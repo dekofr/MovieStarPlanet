@@ -31,6 +31,7 @@ namespace MovieStarPlanet
             {
                 object[] param = { username, password, new object[] { }, null, null, "85efde44997720dfdd8d1850b5b22925" };
                 AMFMessage msg = new AMFMessage(3);
+                msg.AddHeader(new AMFHeader("sessionID", true, await Alghoritm.Dex0r()));
                 msg.AddHeader(new AMFHeader("id", false, Hash.createChecksum(param)));
                 msg.AddHeader(new AMFHeader("needClassName", false, true));
                 msg.AddBody(new AMFBody("MovieStarPlanet.WebService.User.AMFUserServiceWeb.Login", "/1", param));
