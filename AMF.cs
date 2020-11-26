@@ -8,13 +8,18 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Console = Colorful.Console;
 
 namespace dex0fame
 {
     internal class AMF
     {
-        public static string Gateway = "";
+        public static string GetEndpoint(string Server)
+        {
+            WebClient Client = new WebClient();
+            string Response = Client.DownloadString($"https://disco.mspapis.com/disco/v1/services/msp/{Server}?services=mspwebservice");
+            string Endpoint = JObject.Parse(Response)["Services"][0]["Endpoint"];
+            return Endpoint;
+        }
 
         public static async Task<(string Ticket, string Username, string StarCoins, string ActorId)> LoginToMSP(string username, string password, string server)
         {
@@ -42,12 +47,12 @@ namespace dex0fame
                 client.DefaultRequestHeaders.Add("Referer", "https://assets.mspcdns.com/");
 
                 byteArray.Headers.ContentType = new MediaTypeHeaderValue("application/x-amf");
-                HttpResponseMessage response = await client.PostAsync(Gateway + "/Gateway.aspx?method=MovieStarPlanet.WebService.User.AMFUserServiceWeb.Login", byteArray);
+                HttpResponseMessage response = await client.PostAsync(GetEndpoint(server) + "/Gateway.aspx?method=MovieStarPlanet.WebService.User.AMFUserServiceWeb.Login", byteArray);
                 string _response = AMFDecoder(await response.Content.ReadAsByteArrayAsync());
 
                 if (_response.Contains("InvalidCredentials"))
                 {
-                    ticket = "Error";
+                    Console.WriteLine("Invalid credentials!");
                 }
                 else
                 {
@@ -68,18 +73,20 @@ namespace dex0fame
 
 
                     ticket = ticket.Remove(ticket.Length - 1);
+                    Console.WriteLine("Successfully logged in!");
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ticket = "[STATUS]: Something went wrong!";
+                Console.WriteLine($"Something went wrong: {ex}");
             }
 
 
             return (ticket, user, starcoins, actorid);
 
         }
+        
         public static string AMFDecoder(byte[] body)
         {
             string result = "";
@@ -107,134 +114,6 @@ namespace dex0fame
             }
             return result;
         }
-        public static async Task Level(string Ticket, string ActorClickitemRellid, string server)
-        {
-            for (; ; )
-            {
-                try
-                {
-                    Console.WriteLine("Sending req");
-                    HttpClient client = new HttpClient();
-                    object[] content = { new TicketHeader { Ticket = Ticket, anyAttribute = null }, Convert.ToInt32(ActorClickitemRellid), 100 };
-                    AMFMessage amf = new AMFMessage(3);
-                    amf.AddHeader(new AMFHeader("id", false, Hash.createChecksum(content)));
-                    amf.AddHeader(new AMFHeader("needClassName", false, true));
-                    amf.AddBody(new AMFBody("MovieStarPlanet.WebService.Pets.AMFPetService.PlayedPetGame", "/1", content));
-
-                    MemoryStream str = new MemoryStream();
-                    AMFSerializer serializer = new AMFSerializer(str);
-
-                    serializer.WriteMessage(amf);
-                    byte[] bytes = Encoding.Default.GetBytes(Encoding.Default.GetString(str.ToArray()));
-
-                    ByteArrayContent btrContent = new ByteArrayContent(bytes);
-
-
-
-
-
-                    btrContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-amf");
-                    client.DefaultRequestHeaders.Add("Referer", "https://assets.mspcdns.com/");
-                    HttpResponseMessage response = await client.PostAsync(Gateway + "/Gateway.aspx?method=MovieStarPlanet.WebService.Pets.AMFPetService.PlayedPetGame", btrContent);
-
-                    HttpWebRequest.DefaultWebProxy = new WebProxy();
-                    string responseString = AMFDecoder(await response.Content.ReadAsByteArrayAsync());
-                    Console.WriteLine(response.StatusCode.ToString());
-                    if (response.IsSuccessStatusCode)
-                    {
-                        Console.WriteLine("[ INFO ] Earned " + responseString + " fame!");
-                    }
-                    else
-                    {
-                        Console.WriteLine("[ STATUS ] Shadow-banned... Change VPN server!");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("ex: " + ex.ToString());
-                }
-            }
-        }
-        public static async Task<string> GetPetId(string ticket, string actorid, string server)
-        {
-
-            object[] content = { new TicketHeader { Ticket = ticket, anyAttribute = null }, Convert.ToInt32(actorid) };
-            AMFMessage amf = new AMFMessage(3);
-            amf.AddHeader(new AMFHeader("id", false, Hash.createChecksum(content)));
-            amf.AddHeader(new AMFHeader("needClassName", false, true));
-            amf.AddBody(new AMFBody("MovieStarPlanet.WebService.Pets.AMFPetService.GetClickItemsForActor", "/1", content));
-
-            MemoryStream str = new MemoryStream();
-            AMFSerializer serializer = new AMFSerializer(str);
-
-            serializer.WriteMessage(amf);
-            byte[] bytes = Encoding.Default.GetBytes(Encoding.Default.GetString(str.ToArray()));
-
-            ByteArrayContent btrContent = new ByteArrayContent(bytes);
-
-
-
-            HttpClient client = new HttpClient();
-
-            btrContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-amf");
-            client.DefaultRequestHeaders.Add("Referer", "https://assets.mspcdns.com/");
-            HttpWebRequest.DefaultWebProxy = new WebProxy();
-            HttpResponseMessage response = await client.PostAsync(Gateway + "/Gateway.aspx?method=MovieStarPlanet.WebService.Pets.AMFPetService.GetClickItemsForActor", btrContent);
-            string _response = AMFDecoder(await response.Content.ReadAsByteArrayAsync());
-
-            string rellid = null;
-            if (_response.Contains("ActorClickItemRelId"))
-            {
-                JArray responseArr = JArray.Parse(_response);
-                JObject responseObj = JObject.Parse(responseArr[0].ToString());
-                rellid = (string)responseObj["ActorClickItemRelId"];
-            }
-            else
-            {
-                rellid = "ERROR-NO-PETS";
-            }
-            return rellid;
-        }
-
-        public static async Task Dextruct0r(string Username, string Password, string Server)
-        {
-            (string Ticket, string Username, string StarCoins, string ActorId) Result = await LoginToMSP(Username, Password, Server);
-            Console.WriteLine("");
-            Console.WriteLine("|---------------------------|");
-            Console.WriteLine("|    >>>     0x1     <<<    |");
-            Console.WriteLine("|                           |");
-            Console.WriteLine("| # Username: " + Username);
-            Console.WriteLine("| # ActorId: " + Result.ActorId);
-            Console.WriteLine("| # StarCoins: " + Result.StarCoins);
-            Console.WriteLine("|                           |");
-            Console.WriteLine("|    >>>     0x1    <<<     |");
-            Console.WriteLine("|---------------------------|");
-            Console.WriteLine("");
-            Console.WriteLine("# Grabbing old boonie information's...");
-            string PetID = await GetPetId(Result.Ticket, Result.ActorId, Server);
-            if (PetID == "ERROR-NO-PETS")
-            {
-                Console.WriteLine("[ STATUS ] You dont have any old boonie, you need to buy it with dex0Pet", ConsoleColor.Red);
-            }
-            else
-            {
-                Console.WriteLine("[ STATUS ] Successfully grabbed information's about boonie", ConsoleColor.Green);
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-                 Task.Run(() =>  Level(Result.Ticket, PetID, Server));
-            }
-        }
     }
 }
+       
