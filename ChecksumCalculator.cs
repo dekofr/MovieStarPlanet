@@ -1,4 +1,3 @@
-﻿///Full written by DarkkExploit GOD and Legend Desource and Jasper god and loc ce god and luke CSS tooler and me
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SyndicateProject
+namespace MovieStarPlanet
 {
     class ChecksumCalculator
     {
