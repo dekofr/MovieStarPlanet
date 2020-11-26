@@ -1,4 +1,4 @@
-# (Action Message Format) AMF MSP Client
+# MSP Client
 
 Requires:
 
