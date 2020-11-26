@@ -10,7 +10,7 @@ using System.Net.Http;
 using System.IO;
 using Newtonsoft.Json.Linq;
 
-namespace SyndicateProject
+namespace MovieStarPlanet
 {
     class Alghoritm
     {
