@@ -1,5 +1,6 @@
-# dex0Fame
+# (Action Message Format) AMF MSP Client
 
-I used AMF C# Lib for AMF called FluorineFX.
+Requires:
 
-And basic HttpClient async POST function.
+- FluorineFX 
+- Newtonsoft.Json
