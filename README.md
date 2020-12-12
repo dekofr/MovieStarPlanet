@@ -1,6 +1,6 @@
 # Phoenix
 
-> *Phoenix is best free MovieStarPlanet Client.*
+> *Phoenix is best free MovieStarPlanet Game Client.*
 
 Phoenix is **open-source** project created by SKDV Team.
 
