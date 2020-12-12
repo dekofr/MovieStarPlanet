@@ -10,4 +10,4 @@ Phoenix is **open-source** project created by SKDV Team.
 
 ***More info here: https://discord.gg/PDS9d6QDzh***
 
-Have Fun! <3
+Have Fun! 🎈❤
