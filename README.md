@@ -1,6 +1,9 @@
-# MSP Client
+# Phoenix
 
-Requires:
+Phoenix is best free MovieStarPlanet Client.
 
-- FluorineFX 
-- Newtonsoft.Json
+Phoenix is open-source project created by SKDV Team.
+
+You can add improve, add, delete some modules.
+
+Have Fun!
